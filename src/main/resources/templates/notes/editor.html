@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Add Note</title>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+</head>
+
+<body class="bg-light">
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <h2 class="mb-4" th:if="${!editMode}">Create a New Note</h2>
+        <h2 class="mb-4" th:if="${editMode}">Edit the Note</h2>
+
+        <form id="noteForm" th:action="(${editMode} ? '/notes/edit/save/' + ${noteId} : '/notes/create')"
+              th:object="${noteEditorDTO}" method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" id="title" class="form-control" th:field="*{title}" required/>
+            </div>
+            <div class="mb-3">
+                <label for="quill-editor" class="form-label">Content:</label>
+                <div id="quill-editor" class="form-control"></div>
+                <input type="hidden" id="contentHidden" th:field="*{content}" />
+            </div>
+            <div class="mb-3 form-check" id="isPublicSection">
+                <input type="checkbox" id="isPublic" class="form-check-input" th:field="*{isPublic}" th:checked="*{isEncrypted}"
+                       onchange="toggleVisibleInputs()"/>
+                <label class="form-check-label" for="isPublic">Public</label>
+            </div>
+            <div class="mb-3 form-check" id="isEncryptedSection">
+                <input type="checkbox" id="isEncrypted" class="form-check-input" th:field="${noteEditorDTO.isEncrypted}"
+                       onchange="toggleVisibleInputs()" th:checked="${noteEditorDTO.isEncrypted}"/>
+                <label class="form-check-label" for="isEncrypted">Encrypted</label>
+            </div>
+            <div class="mb-3" id="passwordSection">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" id="password" class="form-control" th:field="*{password}" required/>
+            </div>
+
+            <script>
+                window.onload = function () {
+                    var content = document.getElementById('contentHidden');
+                    quill.root.innerHTML = content.value;
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    toggleVisibleInputs();
+                });
+                function toggleVisibleInputs() {
+                    var isPublicChecked = document.getElementById('isPublic').checked;
+                    var isEncryptedChecked = document.getElementById('isEncrypted').checked;
+
+                    var isPublicSection = document.getElementById('isPublicSection');
+                    var isEncryptedSection = document.getElementById('isEncryptedSection');
+                    var passwordSection = document.getElementById('passwordSection');
+
+                    if (isPublicChecked) {
+                        isPublicSection.style.display = '';
+                        isEncryptedSection.style.display = 'none';
+                        passwordSection.style.display = 'none';
+                    } else {
+                        isEncryptedSection.style.display = '';
+                        if (isEncryptedChecked) {
+                            isPublicSection.style.display = 'none';
+                            passwordSection.style.display = '';
+                        } else {
+                            isPublicSection.style.display = '';
+                            passwordSection.style.display = 'none';
+                        }
+                    }
+                }
+            </script>
+
+
+            <button type="button" onclick="submitForm()" class="btn btn-primary" th:text="${editMode ? 'Save note' : 'Create note'}"></button>
+        </form>
+    </div>
+
+    <script>
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            placeholder: '   Write your content here...',
+            modules: {
+                toolbar: {
+                    container: [
+                        [{'header': [1, 2, 3, 4, 5, 6, false]}],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['link', 'image'],
+                        ['clean']
+
+                    ],
+                    handlers: {
+                        image: function () {
+                            var url = prompt('Enter the image URL:');
+                            if (url) {
+                                quill.focus();
+                                var range = quill.getSelection();
+                                quill.insertEmbed(range.index, 'image', url, Quill.sources.USER);
+                            }
+                        }
+                    }
+                }
+            },
+        });
+
+        function submitForm() {
+            document.getElementById('contentHidden').value = quill.root.innerHTML;
+            document.getElementById('noteForm').submit();
+        }
+    </script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

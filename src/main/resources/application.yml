@@ -1,0 +1,41 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yml
+logging:
+  level:
+    org.springframework.security: DEBUG
+#    org.hibernate: DEBUG
+server:
+  port: 443
+  ssl:
+    key-store: classpath:keystore/keystore.p12
+    key-store-type: PKCS12
+    key-store-password: fc74b7812296129c3e
+    key-password: fc74b7812296129c3e
+    key-alias: notes-manager
+    enabled: true # only HTTPS
+#    trust-store: classpath:keystore/keystore.p12
+#    trust-store-password: fc74b7812296129c3e
+
+
+  # Generowanie klucza:
+  # keytool -genkeypair -alias notes-manager -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -validity 3650
+  # Utworzenie pliku certyfikatu do podpisania:
+  # keytool -export -keystore keystore.p12 -alias notes-manager -file keystore_to_sign.cer
+
+
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem
+
+
+# openssl req -new -newkey rsa:2048 -nodes -out CA_CSR.csr -keyout CA_private_key.key -sha256
+# openssl x509 -signkey CA_private_key.key -days 365 -req -in CA_CSR.csr -out CA_certificate.arm -sha256
+# openssl x509 -req -days 365 -in CA_CSR.csr -CA CA_certificate.arm -CAkey CA_private_key.key -out certificate.arm -set_serial 01 -sha256

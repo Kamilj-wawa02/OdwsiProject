@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Notes</title>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <!--padding: top ; left and right ; bottom-->
+    <style>
+        .note-card {
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+
+        .note-inner-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            margin-left: 0.75rem;
+            margin-right: -0.1rem;
+            padding: 1rem 1rem 0.5rem;
+        }
+        .note-inner-card:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <h2 class="mb-4">My notes</h2>
+
+        <a href="/notes/create" class="btn btn-primary" style="margin: 0 0 1rem">
+            Create new note
+        </a>
+
+        <div th:each="note : ${userCreatedNotes}">
+            <div th:class="${note.isEncrypted} ? 'note-card bg-warning' : (${note.isPublic} ? 'note-card bg-success' : 'note-card bg-secondary')">
+                <div class="note-inner-card" th:onclick="'handleShowDetails(' + ${note.id} + ',' + ${note.isEncrypted} + ')'">
+                    <h4 th:text="${note.title}"></h4>
+                    <p>
+                        <strong>Public:</strong> <span th:text="${note.isPublic}"></span> <span>&nbsp;&nbsp;</span>
+                        <strong>Encrypted:</strong> <span th:text="${note.isEncrypted}"></span>
+                    </p>
+                    <div class="action-buttons d-flex" style="gap: 0.15rem; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+<!--                        <th:block th:if="${!note.isEncrypted}">-->
+<!--                            <th:block th:if="${!note.isPublic}">-->
+<!--                                <button type="button" class="btn btn-success btn-sm" onclick="event.stopPropagation()">Publish</button>-->
+<!--                            </th:block>-->
+<!--                            <th:block th:if="${note.isPublic}">-->
+<!--                                <button type="button" class="btn btn-success btn-sm" onclick="event.stopPropagation()">Unpublish</button>-->
+<!--                            </th:block>-->
+<!--                        </th:block>-->
+
+<!--                        <th:block th:if="${!note.isPublic}">-->
+<!--                            <th:block th:if="${!note.isEncrypted}">-->
+<!--                                <button type="button" class="btn btn-warning btn-sm">Encrypt</button>-->
+<!--                            </th:block>-->
+<!--                            <th:block th:if="${note.isEncrypted}">-->
+<!--                                <button type="button" class="btn btn-warning btn-sm">Decrypt</button>-->
+<!--                            </th:block>-->
+<!--                        </th:block>-->
+
+                        <button type="button" class="btn btn-primary btn-sm"
+                                th:onclick="'event.stopPropagation();handleEdit(' + ${note.id} + ',' + ${note.isEncrypted} + ')'">
+<!--                                data-bs-toggle="modal" data-bs-target="#passwordModal">-->
+                            Edit
+                        </button>
+
+                        <form th:id="'showDetailsForm' + ${note.id}" th:action="@{'/notes/details/' + ${note.id}}" method="post"
+                              th:object="${notePasswordDTO}">
+                            <input th:id="'showDetailsFormPassword' + ${note.id}" type="hidden" th:field="*{password}">
+                        </form>
+                        <form th:id="'editForm' + ${note.id}" th:action="@{'/notes/edit/' + ${note.id}}" method="post"
+                              th:object="${notePasswordDTO}">
+                            <input th:id="'editFormPassword' + ${note.id}" type="hidden" th:field="*{password}">
+                        </form>
+
+                        <form th:id="'deleteForm' + ${note.id}" th:action="@{'/notes/delete/' + ${note.id}}" method="post">
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    th:onclick="'event.stopPropagation();handleDelete(' + ${note.id} + ')'"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" th:object="${notePasswordDTO}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Enter Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="passwordInput" class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="passwordInput" th:field="*{password}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" onclick="handlePasswordInput()">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Are you sure you want to delete this note?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                        <button type="submit" class="btn btn-danger" onclick="handleModalDelete()">Yes, delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script>
+            var currentPasswordActivity = 'edit';
+            var currentPasswordElementId = -1;
+            var currentDeleteElementId = -1;
+
+            function handleShowDetails(id, isEncrypted) {
+                if (!isEncrypted) {
+                    callShowDetails(id);
+                } else {
+                    openPasswordModal('showDetails', id);
+                }
+            }
+            function handleEdit(id, isEncrypted) {
+                if (!isEncrypted) {
+                    callEdit(id);
+                } else {
+                    openPasswordModal('edit', id);
+                }
+            }
+
+            function handleDelete(id) {
+                currentDeleteElementId = id;
+            }
+            function handleModalDelete() {
+                var form = document.getElementById("deleteForm" + currentDeleteElementId);
+                form.submit();
+            }
+
+            function callShowDetails(id) {
+                var form = document.getElementById("showDetailsForm" + id);
+                form.submit();
+            }
+            function callEdit(id) {
+                var form = document.getElementById("editForm" + id);
+                form.submit();
+            }
+
+            function openPasswordModal(activity, elementId) {
+                console.log("open modal");
+                currentPasswordActivity = activity;
+                currentPasswordElementId = elementId;
+                $('#passwordModal').modal('show');
+            }
+
+            function handlePasswordInput() {
+                console.log("handle submit");
+                var password = document.getElementById('passwordInput').value;
+
+                // if (password.trim() !== '') {
+                $('#passwordModal').modal('hide');
+
+                if (currentPasswordActivity === 'edit') {
+                    document.getElementById('editFormPassword' + currentPasswordElementId).value = password;
+                    callEdit(currentPasswordElementId);
+                } else if (currentPasswordActivity === 'showDetails') {
+                    document.getElementById('showDetailsFormPassword' + currentPasswordElementId).value = password;
+                    callShowDetails(currentPasswordElementId);
+                }
+
+                // } else {
+                //     alert("Please enter a password.");
+                // }
+            }
+
+        </script>
+
+        <h2 class="mb-4" style="margin-top: 2.5rem">Community public notes</h2>
+
+        <div th:each="note : ${publicNotesForUser}">
+            <div class="note-card bg-success">
+                <div class="note-inner-card" th:onclick="'handleShowDetails(' + ${note.id} + ',' + ${note.isEncrypted} + ')'">
+                    <form th:id="'showDetailsForm' + ${note.id}" th:action="@{'/notes/details/' + ${note.id}}" method="post"
+                          th:object="${notePasswordDTO}">
+                        <input th:id="'detailsFormPassword' + ${note.id}" type="hidden" th:field="*{password}">
+                    </form>
+
+                    <h4 th:text="${note.title}"></h4>
+                    <p style="margin-bottom: 0.5rem">
+                        <strong>Author:</strong> <span th:text="${note.authorUsername}"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${publicNotesForUser.size() == 0}">
+            <p>
+                Hmm, strange. It seems like there are no public notes from the community to display.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
+
+
