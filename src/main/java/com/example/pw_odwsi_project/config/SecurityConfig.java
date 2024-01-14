@@ -19,34 +19,13 @@ public class SecurityConfig {
     private final CustomAuthenticationProvider authenticationProvider;
     private final CustomWebAuthenticationDetailsSource authenticationDetailsSource;
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        //return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//        return new BCryptPasswordEncoder(12);
-//    }
-
-//    @Bean
-//    public AuthenticationManager authenticationManager(
-//            final AuthenticationConfiguration authenticationConfiguration) throws Exception {
-//        return authenticationConfiguration.getAuthenticationManager();
-//    }
-
-//    @Bean
-//    public DaoAuthenticationProvider authProvider() {
-//        CustomAuthenticationProvider authProvider = new CustomAuthenticationProvider(userRepository);
-//        authProvider.setUserDetailsService(userDetailsServiceImpl);
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        return authProvider;
-//    }
-
-
     @Bean
     public SecurityFilterChain configure(final HttpSecurity http) throws Exception {
         return http
                 .cors(withDefaults())
                 .csrf(withDefaults())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/login", "/register", "/register-qr", "/password-reset").permitAll()
+                        .requestMatchers("/login", "/register", "/register-qr", "/reset-password", "/change-password").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )

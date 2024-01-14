@@ -46,4 +46,6 @@ public class Token {
         this.expirationDate = LocalDateTime.now().plusMinutes(EXPIRATION_MINS);
     }
 
+
+
 }
