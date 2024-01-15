@@ -54,6 +54,7 @@ public class UserController {
                         @RequestParam(name = "logoutSuccess", required = false) Boolean logoutSuccess,
                         Model model) {
         if (loginError == Boolean.TRUE) {
+
             model.addAttribute(WebUtils.MSG_ERROR, "Your login was not successful - please try again");
         } else if (logoutSuccess == Boolean.TRUE) {
             model.addAttribute(WebUtils.MSG_INFO, "Successfully logged out");

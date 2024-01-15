@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.aerogear.security.otp.Totp;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,11 +21,13 @@ import org.springframework.stereotype.Component;
 import com.github.benmanes.caffeine.cache.Cache;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
 
-    private static final int LOGIN_DELAY = 1500;
-    private static final int MAX_LOGIN_ATTEMPTS = 5;
+    private static final int LOGIN_DELAY = 500;
+    private static final int MAX_LOGIN_ATTEMPTS = 3;
+    public static  final String MAX_LOGIN_ATTEMPTS_MSG = "Reached maximum number of login attempts. Try again later.";
 
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
@@ -98,7 +101,8 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
         final String ipAddress = httpServletRequest.getRemoteAddr();
         final int unsuccessfulLoginAttempts = unsuccessfulLoginAttemptsCache.get(ipAddress, key -> 0);
         if (unsuccessfulLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
-            throw new BadCredentialsException("Reached max unsuccessful login attempts.");
+            log.warn("Reached maximum unsuccessful login attempts from " + ipAddress);
+            throw new BadCredentialsException(MAX_LOGIN_ATTEMPTS_MSG);
         }
     }
 

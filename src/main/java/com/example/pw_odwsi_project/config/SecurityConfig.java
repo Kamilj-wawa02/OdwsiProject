@@ -5,9 +5,15 @@ import com.example.pw_odwsi_project.auth.totp.CustomWebAuthenticationDetailsSour
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -20,7 +26,18 @@ public class SecurityConfig {
     private final CustomWebAuthenticationDetailsSource authenticationDetailsSource;
 
     @Bean
-    public SecurityFilterChain configure(final HttpSecurity http) throws Exception {
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .authenticationProvider(authenticationProvider)
+                .build();
+    }
+
+    private AuthenticationManager customProviderManager(List<AuthenticationProvider> providers) {
+        return new ProviderManager(providers);
+    }
+
+    @Bean
+    public SecurityFilterChain configure(final HttpSecurity http,  List<AuthenticationProvider> providers) throws Exception {
         return http
                 .cors(withDefaults())
                 .csrf(withDefaults())
@@ -29,7 +46,8 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .authenticationProvider(authenticationProvider)
+                .authenticationManager(customProviderManager(providers))
+//                .authenticationProvider(authenticationProvider)
 //                .requiresChannel(requiresChannel -> requiresChannel
 //                        .anyRequest().requiresSecure())
                 .formLogin(form -> form
