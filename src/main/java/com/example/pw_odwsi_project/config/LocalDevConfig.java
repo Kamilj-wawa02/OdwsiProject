@@ -14,6 +14,11 @@ public class LocalDevConfig {
 
     @SneakyThrows
     public LocalDevConfig(final TemplateEngine templateEngine) {
+        String environment = System.getProperty("spring.profiles.active");
+        if (environment != null && environment.equalsIgnoreCase("production")) {
+            return;
+        }
+
         File sourceRoot = new ClassPathResource("application.yml").getFile().getParentFile();
         while (sourceRoot.listFiles((dir, name) -> name.equals("mvnw")).length != 1) {
             sourceRoot = sourceRoot.getParentFile();

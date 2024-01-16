@@ -37,9 +37,9 @@ public class UserService implements UserDetailsService {
 
     public static final String APP_NAME = "NotesManager";
     public static final String QR_URL_PREFIX = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=";
-    public static final String INVALID_TOKEN = "Token is invalid.";
-    public static final String DIFFERENT_PASSWORDS = "Provided password is too weak.";
-    public static final String TOO_WEAK_PASSWORD = "Provided password is too weak.";
+    public static final String INVALID_TOKEN_MSG = "Token is invalid.";
+    public static final String DIFFERENT_PASSWORDS_MSG = "Provided password is too weak.";
+    public static final String TOO_WEAK_PASSWORD_MSG = "Provided password is too weak.";
     private final int PASSWORD_MIN_ENTROPY = 80;
 
 
@@ -66,10 +66,10 @@ public class UserService implements UserDetailsService {
             throw new IllegalStateException("This username or email has already been used.");
         }
         if (!userRegistrationDTO.password().equals(userRegistrationDTO.passwordToConfirm())) {
-            throw new IllegalStateException(DIFFERENT_PASSWORDS);
+            throw new IllegalStateException(DIFFERENT_PASSWORDS_MSG);
         }
         if (entropyService.calculatePasswordEntropy(userRegistrationDTO.password()) < PASSWORD_MIN_ENTROPY) {
-            throw new IllegalStateException(TOO_WEAK_PASSWORD);
+            throw new IllegalStateException(TOO_WEAK_PASSWORD_MSG);
         }
 
         final String password = passwordEncoder.encode(userRegistrationDTO.password());
@@ -113,18 +113,21 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public Boolean validateResetPasswordToken(String tokenIdentifier) {
+    public Boolean validatePasswordResetToken(String tokenIdentifier) {
         if (tokenIdentifier == null) {
+            System.out.println("Token is null");
             return false;
         }
 
         final Optional<Token> returnedToken = tokenRepository.findByToken(tokenIdentifier);
         if (returnedToken.isEmpty()) {
+            System.out.println("Token is empty, identifier: '" + tokenIdentifier + "'");
             return false;
         }
 
         final Token token = returnedToken.get();
         if (token.hasExpired()) {
+            System.out.println("Token has expired");
             tokenRepository.delete(token);
             return false;
         }
@@ -134,17 +137,17 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void changePassword(UserPasswordChangeDTO userPasswordChangeDTO) {
-        if (validateResetPasswordToken(userPasswordChangeDTO.token())) {
-            throw new IllegalStateException(INVALID_TOKEN);
+        if (!validatePasswordResetToken(userPasswordChangeDTO.token())) {
+            throw new IllegalStateException(INVALID_TOKEN_MSG);
         }
         final Token token = tokenRepository.findByToken(userPasswordChangeDTO.token())
-                .orElseThrow(() -> new IllegalStateException(INVALID_TOKEN));
+                .orElseThrow(() -> new IllegalStateException(INVALID_TOKEN_MSG));
 
         if (!userPasswordChangeDTO.password().equals(userPasswordChangeDTO.passwordToConfirm())) {
-            throw new IllegalStateException(DIFFERENT_PASSWORDS);
+            throw new IllegalStateException(DIFFERENT_PASSWORDS_MSG);
         }
         if (entropyService.calculatePasswordEntropy(userPasswordChangeDTO.password()) < PASSWORD_MIN_ENTROPY) {
-            throw new IllegalStateException(TOO_WEAK_PASSWORD);
+            throw new IllegalStateException(TOO_WEAK_PASSWORD_MSG);
         }
 
         final User user = token.getUser();
@@ -156,6 +159,7 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(userPasswordChangeDTO.password()));
         userRepository.save(user);
+        tokenRepository.delete(token);
     }
 
 }

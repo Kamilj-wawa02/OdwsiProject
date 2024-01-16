@@ -1,9 +1,25 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - default
+    depends_on:
+      - postgres
   postgres:
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=com.example.database'
-      - 'POSTGRES_PASSWORD=secret_password'
-      - 'POSTGRES_USER=com.example.database'
+      - 'POSTGRES_DB=notes_manager'
+      - 'POSTGRES_PASSWORD=c881d4a26984d'
+      - 'POSTGRES_USER=notes_manager'
     ports:
       - '5432:5432'
+    networks:
+      - default
+networks:
+  default:
+    driver: bridge

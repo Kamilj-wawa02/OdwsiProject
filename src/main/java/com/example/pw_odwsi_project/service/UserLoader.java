@@ -25,7 +25,7 @@ public class UserLoader implements ApplicationRunner {
 //        if (userRepository.count() != 0) {
 //            return;
 //        }
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>> Creating user, current count: " + userRepository.count());
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>> Application successfully started <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         User user = new User();
         user.setUsername("test");
         user.setEmail("test@test.com");

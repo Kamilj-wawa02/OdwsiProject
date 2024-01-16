@@ -1,7 +1,7 @@
 package com.example.pw_odwsi_project.config;
 
-import com.example.pw_odwsi_project.auth.totp.CustomAuthenticationProvider;
-import com.example.pw_odwsi_project.auth.totp.CustomWebAuthenticationDetailsSource;
+import com.example.pw_odwsi_project.auth.CustomAuthenticationProvider;
+import com.example.pw_odwsi_project.auth.TotpWebAuthenticationDetailsSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final CustomAuthenticationProvider authenticationProvider;
-    private final CustomWebAuthenticationDetailsSource authenticationDetailsSource;
+    private final TotpWebAuthenticationDetailsSource authenticationDetailsSource;
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {

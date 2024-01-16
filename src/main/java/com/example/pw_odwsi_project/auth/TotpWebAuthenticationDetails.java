@@ -1,17 +1,15 @@
-package com.example.pw_odwsi_project.auth.totp;
+package com.example.pw_odwsi_project.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-public class CustomWebAuthenticationDetails extends WebAuthenticationDetails {
+@Getter
+public class TotpWebAuthenticationDetails extends WebAuthenticationDetails {
 
-    private static final long serialVersionUID = 1L;
-
-    @Getter
     private final String verificationCode;
 
-    public CustomWebAuthenticationDetails(HttpServletRequest request) {
+    public TotpWebAuthenticationDetails(HttpServletRequest request) {
         super(request);
         verificationCode = request.getParameter("code");
     }

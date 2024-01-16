@@ -1,5 +1,6 @@
-package com.example.pw_odwsi_project.auth.totp;
+package com.example.pw_odwsi_project.auth;
 
+import com.example.pw_odwsi_project.auth.TotpWebAuthenticationDetails;
 import com.example.pw_odwsi_project.domain.User;
 import com.example.pw_odwsi_project.repos.UserRepository;
 import jakarta.annotation.PostConstruct;
@@ -8,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.aerogear.security.otp.Totp;
-import org.springframework.boot.logging.LogLevel;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -43,11 +43,11 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        System.out.println("Login attempt #" + getCurrentLoginAttempts() + " of " + authentication.getName());
+        System.out.println("Login attempt #" + (getCurrentLoginAttempts() + 1) + " of " + authentication.getName());
         checkLoginAttempts();
 
         try {
-            Thread.sleep(LOGIN_DELAY + (long) (Math.random() * 400));
+            Thread.sleep(LOGIN_DELAY + (long) (Math.random() * 500));
         } catch (InterruptedException exception) {
             throw new RuntimeException(exception);
         }
@@ -72,7 +72,7 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         super.additionalAuthenticationChecks(userDetails, authentication);
 
-        final String verificationCode = ((CustomWebAuthenticationDetails) authentication.getDetails()).getVerificationCode();
+        final String verificationCode = ((TotpWebAuthenticationDetails) authentication.getDetails()).getVerificationCode();
         final User user = userRepository.findByEmailIgnoreCase(authentication.getName());
         if (user == null) {
             throw new BadCredentialsException("Invalid username or password");
@@ -101,7 +101,7 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
         final String ipAddress = httpServletRequest.getRemoteAddr();
         final int unsuccessfulLoginAttempts = unsuccessfulLoginAttemptsCache.get(ipAddress, key -> 0);
         if (unsuccessfulLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
-            log.warn("Reached maximum unsuccessful login attempts from " + ipAddress);
+            log.warn("User at IP " + ipAddress + " performed login attempt that exceeds the maximum tries (" + MAX_LOGIN_ATTEMPTS + ").");
             throw new BadCredentialsException(MAX_LOGIN_ATTEMPTS_MSG);
         }
     }

@@ -1,0 +1,7 @@
+spring:
+  devtools:
+    add-properties: false
+  datasource:
+    url: jdbc:postgresql://postgres:5432/notes_manager
+    username: notes_manager
+    password: c881d4a26984d

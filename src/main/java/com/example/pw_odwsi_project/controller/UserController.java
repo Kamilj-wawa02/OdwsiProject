@@ -1,5 +1,6 @@
 package com.example.pw_odwsi_project.controller;
 
+import com.example.pw_odwsi_project.auth.CustomAuthenticationProvider;
 import com.example.pw_odwsi_project.domain.User;
 import com.example.pw_odwsi_project.model.UserPasswordChangeDTO;
 import com.example.pw_odwsi_project.model.UserPasswordResetDTO;
@@ -7,9 +8,11 @@ import com.example.pw_odwsi_project.model.UserRegistrationDTO;
 import com.example.pw_odwsi_project.service.UserService;
 import com.example.pw_odwsi_project.util.WebUtils;
 import com.google.zxing.WriterException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +27,7 @@ import java.io.IOException;
 public class UserController {
 
     private final UserService userService;
+    public static final String BINDING_ERROR_MSG = "All or some of the provided data are invalid. Please try again.";
 
     @GetMapping("/register")
     public String register(Model model) {
@@ -34,7 +38,7 @@ public class UserController {
     @PostMapping("/register")
     public String registerUser(@Valid UserRegistrationDTO userRegistrationDTO, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, model);
             return "authentication/register";
         }
 
@@ -52,12 +56,17 @@ public class UserController {
     @GetMapping("/login")
     public String login(@RequestParam(name = "loginError", required = false) Boolean loginError,
                         @RequestParam(name = "logoutSuccess", required = false) Boolean logoutSuccess,
+                        HttpServletRequest request,
                         Model model) {
         if (loginError == Boolean.TRUE) {
-
-            model.addAttribute(WebUtils.MSG_ERROR, "Your login was not successful - please try again");
+            AuthenticationException authenticationException = (AuthenticationException) request.getSession().getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+            if (authenticationException != null && authenticationException.getMessage().equals(CustomAuthenticationProvider.MAX_LOGIN_ATTEMPTS_MSG)) {
+                model.addAttribute(WebUtils.MSG_ERROR, CustomAuthenticationProvider.MAX_LOGIN_ATTEMPTS_MSG);
+            } else {
+                model.addAttribute(WebUtils.MSG_ERROR, "Your login was not successful - please try again");
+            }
         } else if (logoutSuccess == Boolean.TRUE) {
-            model.addAttribute(WebUtils.MSG_INFO, "Successfully logged out");
+            model.addAttribute(WebUtils.MSG_SUCCESS, "Successfully logged out");
         }
         //model.addAttribute("userLoginDTO", new UserLoginDTO());
         return "authentication/login";
@@ -72,7 +81,7 @@ public class UserController {
     @PostMapping("/reset-password")
     public String passwordReset(@Valid UserPasswordResetDTO userPasswordResetDTO, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, model);
             return "authentication/reset-password";
         }
 
@@ -90,10 +99,12 @@ public class UserController {
 
     @GetMapping("/change-password")
     public String changePassword(@RequestParam("token") String token, Model model, RedirectAttributes redirectAttributes) {
-        if (!userService.validateResetPasswordToken(token)) {
-            redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, "Invalid token.");
+        if (!userService.validatePasswordResetToken(token)) {
+            System.out.println("-> invalid token: " + token);
+            redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, UserService.INVALID_TOKEN_MSG);
             return "redirect:/login";
         }
+        System.out.println("-> VALID token: " + token);
 
         model.addAttribute("userPasswordChangeDTO", new UserPasswordChangeDTO("", "", token));
         return "authentication/change-password";
@@ -102,9 +113,11 @@ public class UserController {
     @PostMapping("/change-password")
     public String changePassword(@Valid UserPasswordChangeDTO userPasswordChangeDTO, BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, model);
             return "authentication/change-password";
         }
+
+        System.out.println("performing password reset on: " + userPasswordChangeDTO.token());
 
         try {
             userService.changePassword(userPasswordChangeDTO);
@@ -114,6 +127,11 @@ public class UserController {
             model.addAttribute(WebUtils.MSG_ERROR, exception.getMessage());
             return "authentication/change-password";
         }
+    }
+
+    public void handleBindingError(BindingResult bindingResult, Model model) {
+        //model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+        model.addAttribute(WebUtils.MSG_ERROR, BINDING_ERROR_MSG);
     }
 
 

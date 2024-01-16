@@ -6,6 +6,7 @@ import com.example.pw_odwsi_project.model.NoteEditorDTO;
 import com.example.pw_odwsi_project.model.NotePasswordDTO;
 import com.example.pw_odwsi_project.repos.UserRepository;
 import com.example.pw_odwsi_project.service.NoteService;
+import com.example.pw_odwsi_project.service.UserService;
 import com.example.pw_odwsi_project.util.WebUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -37,7 +38,7 @@ public class NoteController {
     @PostMapping("/details/{id}")
     public String viewNote(@PathVariable Long id, @AuthenticationPrincipal User user, Model model, @Valid NotePasswordDTO notePasswordDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, redirectAttributes);
             return "redirect:/notes";
         }
 
@@ -61,7 +62,8 @@ public class NoteController {
     @PostMapping("/create")
     public String createNote(@Valid NoteEditorDTO noteEditorDTO, BindingResult bindingResult, @AuthenticationPrincipal User user, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, model);
+            model.addAttribute("editMode", false);
             return "notes/editor";
         }
 
@@ -79,7 +81,9 @@ public class NoteController {
     @PostMapping("/edit/{id}")
     public String editNote(@PathVariable Long id, @AuthenticationPrincipal User user, Model model, @Valid NotePasswordDTO notePasswordDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, model);
+            model.addAttribute("editMode", true);
+            model.addAttribute("noteId", id);
             return "notes/editor";
         }
 
@@ -99,9 +103,11 @@ public class NoteController {
     }
 
     @PostMapping("/edit/save/{id}")
-    public String editNote(@PathVariable Long id, NoteEditorDTO noteEditorDTO, BindingResult bindingResult, @AuthenticationPrincipal User user, Model model, RedirectAttributes redirectAttributes) {
+    public String editNote(@PathVariable Long id, @Valid NoteEditorDTO noteEditorDTO, BindingResult bindingResult, @AuthenticationPrincipal User user, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+            handleBindingError(bindingResult, model);
+            model.addAttribute("editMode", true);
+            model.addAttribute("noteId", id);
             return "notes/editor";
         }
 
@@ -127,44 +133,14 @@ public class NoteController {
         }
     }
 
-//    ----------------------------------------------------------------
+    public void handleBindingError(BindingResult bindingResult, Model model) {
+        //model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+        model.addAttribute(WebUtils.MSG_ERROR, UserController.BINDING_ERROR_MSG);
+    }
 
-
-//    @PostMapping("/create")
-//    public String create(@ModelAttribute("note") @Valid final NoteDTO noteDTO,
-//                      final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
-//        if (bindingResult.hasErrors()) {
-//            return "notes/create";
-//        }
-//        noteService.create(noteDTO);
-//        redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, ""); //WebUtils.getMessage("note.create.success"));
-//        return "redirect:/notes";
-//    }
-
-//    @GetMapping("/edit/{id}")
-//    public String edit(@PathVariable(name = "id") final Long id, final Model model) {
-//        model.addAttribute("note", noteService.get(id));
-//        return "note/edit";
-//    }
-//
-//    @PostMapping("/edit/{id}")
-//    public String edit(@PathVariable(name = "id") final Long id,
-//                       @ModelAttribute("note") @Valid final NoteDTO noteDTO, final BindingResult bindingResult,
-//                       final RedirectAttributes redirectAttributes) {
-//        if (bindingResult.hasErrors()) {
-//            return "note/edit";
-//        }
-//        noteService.update(id, noteDTO);
-//        redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, ""); //WebUtils.getMessage("note.update.success"));
-//        return "redirect:/notes";
-//    }
-//
-//    @PostMapping("/delete/{id}")
-//    public String delete(@PathVariable(name = "id") final Long id,
-//                         final RedirectAttributes redirectAttributes) {
-//        noteService.delete(id);
-//        redirectAttributes.addFlashAttribute(WebUtils.MSG_INFO, ""); //WebUtils.getMessage("note.delete.success"));
-//        return "redirect:/notes";
-//    }
+    public void handleBindingError(BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        //redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
+        redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, UserController.BINDING_ERROR_MSG);
+    }
 
 }
