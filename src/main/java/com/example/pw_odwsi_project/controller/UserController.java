@@ -5,6 +5,7 @@ import com.example.pw_odwsi_project.domain.User;
 import com.example.pw_odwsi_project.model.UserPasswordChangeDTO;
 import com.example.pw_odwsi_project.model.UserPasswordResetDTO;
 import com.example.pw_odwsi_project.model.UserRegistrationDTO;
+import com.example.pw_odwsi_project.service.BindingErrorHandler;
 import com.example.pw_odwsi_project.service.UserService;
 import com.example.pw_odwsi_project.util.WebUtils;
 import com.google.zxing.WriterException;
@@ -27,7 +28,7 @@ import java.io.IOException;
 public class UserController {
 
     private final UserService userService;
-    public static final String BINDING_ERROR_MSG = "All or some of the provided data are invalid. Please try again.";
+    private  final BindingErrorHandler bindingErrorHandler;
 
     @GetMapping("/register")
     public String register(Model model) {
@@ -38,7 +39,7 @@ public class UserController {
     @PostMapping("/register")
     public String registerUser(@Valid UserRegistrationDTO userRegistrationDTO, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, model);
+            bindingErrorHandler.handleBindingError(bindingResult, model);
             return "authentication/register";
         }
 
@@ -81,7 +82,7 @@ public class UserController {
     @PostMapping("/reset-password")
     public String passwordReset(@Valid UserPasswordResetDTO userPasswordResetDTO, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, model);
+            bindingErrorHandler.handleBindingError(bindingResult, model);
             return "authentication/reset-password";
         }
 
@@ -113,7 +114,7 @@ public class UserController {
     @PostMapping("/change-password")
     public String changePassword(@Valid UserPasswordChangeDTO userPasswordChangeDTO, BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, model);
+            bindingErrorHandler.handleBindingError(bindingResult, model);
             return "authentication/change-password";
         }
 
@@ -127,11 +128,6 @@ public class UserController {
             model.addAttribute(WebUtils.MSG_ERROR, exception.getMessage());
             return "authentication/change-password";
         }
-    }
-
-    public void handleBindingError(BindingResult bindingResult, Model model) {
-        //model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
-        model.addAttribute(WebUtils.MSG_ERROR, BINDING_ERROR_MSG);
     }
 
 

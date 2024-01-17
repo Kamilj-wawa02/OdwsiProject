@@ -8,7 +8,7 @@ import org.springframework.lang.NonNull;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor//(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class Note {
 
     @Id

@@ -7,14 +7,11 @@ import lombok.Getter;
 
 public record NoteEditorDTO(
 
-        @NotNull
         @Size(max = 255, message = "Title must not have more than 255 characters")
         @NotBlank(message = "Title cannot be blank")
         String title,
 
-        @NotNull
-        @Size(max = 255, message = "Content must not have more than 255 characters")
-        @NotBlank(message = "Content cannot be blank")
+        @Size(max = 10000, message = "Content must not have more than 10000 characters")
         String content,
 
         @NotNull

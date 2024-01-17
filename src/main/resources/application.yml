@@ -14,10 +14,22 @@ spring:
     compose:
       enabled: true
       file: docker-compose.yml
-#logging:
-#  level:
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: ba96487e86ef32
+    password: 673136d78495b9
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+logging:
+  level:
 #    org.springframework.security: DEBUG
 #    org.hibernate: DEBUG
+    org.springframework.mail.javamail: DEBUG
 server:
   port: 443
   ssl:
@@ -27,6 +39,7 @@ server:
     key-password: fc74b7812296129c3e
     key-alias: notes-manager
     enabled: true
+
 
   # ---------- GENERATING KEYSTORE USING KEYTOOL:
   # keytool -genkeypair -alias notes-manager -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -validity 3650

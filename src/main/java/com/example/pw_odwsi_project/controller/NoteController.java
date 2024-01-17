@@ -5,6 +5,7 @@ import com.example.pw_odwsi_project.model.NoteDTO;
 import com.example.pw_odwsi_project.model.NoteEditorDTO;
 import com.example.pw_odwsi_project.model.NotePasswordDTO;
 import com.example.pw_odwsi_project.repos.UserRepository;
+import com.example.pw_odwsi_project.service.BindingErrorHandler;
 import com.example.pw_odwsi_project.service.NoteService;
 import com.example.pw_odwsi_project.service.UserService;
 import com.example.pw_odwsi_project.util.WebUtils;
@@ -26,6 +27,7 @@ import java.util.UUID;
 public class NoteController {
 
     private final NoteService noteService;
+    private final BindingErrorHandler bindingErrorHandler;
 
     @GetMapping
     public String viewNotesList(@AuthenticationPrincipal User user, Model model) {
@@ -38,7 +40,7 @@ public class NoteController {
     @PostMapping("/details/{id}")
     public String viewNote(@PathVariable Long id, @AuthenticationPrincipal User user, Model model, @Valid NotePasswordDTO notePasswordDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, redirectAttributes);
+            bindingErrorHandler.handleBindingError(bindingResult, redirectAttributes);
             return "redirect:/notes";
         }
 
@@ -62,7 +64,7 @@ public class NoteController {
     @PostMapping("/create")
     public String createNote(@Valid NoteEditorDTO noteEditorDTO, BindingResult bindingResult, @AuthenticationPrincipal User user, Model model) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, model);
+            bindingErrorHandler.handleBindingError(bindingResult, model);
             model.addAttribute("editMode", false);
             return "notes/editor";
         }
@@ -81,7 +83,7 @@ public class NoteController {
     @PostMapping("/edit/{id}")
     public String editNote(@PathVariable Long id, @AuthenticationPrincipal User user, Model model, @Valid NotePasswordDTO notePasswordDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, model);
+            bindingErrorHandler.handleBindingError(bindingResult, model);
             model.addAttribute("editMode", true);
             model.addAttribute("noteId", id);
             return "notes/editor";
@@ -105,7 +107,7 @@ public class NoteController {
     @PostMapping("/edit/save/{id}")
     public String editNote(@PathVariable Long id, @Valid NoteEditorDTO noteEditorDTO, BindingResult bindingResult, @AuthenticationPrincipal User user, Model model, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            handleBindingError(bindingResult, model);
+            bindingErrorHandler.handleBindingError(bindingResult, model);
             model.addAttribute("editMode", true);
             model.addAttribute("noteId", id);
             return "notes/editor";
@@ -131,16 +133,6 @@ public class NoteController {
             redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, exception.getMessage());
             return "redirect:/notes";
         }
-    }
-
-    public void handleBindingError(BindingResult bindingResult, Model model) {
-        //model.addAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
-        model.addAttribute(WebUtils.MSG_ERROR, UserController.BINDING_ERROR_MSG);
-    }
-
-    public void handleBindingError(BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        //redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, bindingResult.getAllErrors().toString());
-        redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, UserController.BINDING_ERROR_MSG);
     }
 
 }

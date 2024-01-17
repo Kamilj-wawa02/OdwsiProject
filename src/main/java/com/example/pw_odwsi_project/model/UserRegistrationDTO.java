@@ -2,8 +2,6 @@ package com.example.pw_odwsi_project.model;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
 
 public record UserRegistrationDTO(
 

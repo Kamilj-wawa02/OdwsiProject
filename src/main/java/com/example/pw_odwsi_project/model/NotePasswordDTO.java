@@ -7,6 +7,7 @@ import lombok.Getter;
 
 public record NotePasswordDTO(
 
+        @NotBlank(message = "Password cannot be blank")
         @Size(max = 255, message = "Password must not have more than 255 characters")
         String password
 

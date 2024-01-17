@@ -2,6 +2,7 @@ package com.example.pw_odwsi_project.config;
 
 import com.example.pw_odwsi_project.auth.CustomAuthenticationProvider;
 import com.example.pw_odwsi_project.auth.TotpWebAuthenticationDetailsSource;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
-@RequiredArgsConstructor()
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class SecurityConfig {
 
     private final CustomAuthenticationProvider authenticationProvider;
@@ -37,8 +38,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain configure(final HttpSecurity http,  List<AuthenticationProvider> providers) throws Exception {
+    public SecurityFilterChain configure(final HttpSecurity http, List<AuthenticationProvider> providers) throws Exception {
         return http
+//                .headers(headers -> headers
+//                        .addHeaderWriter((request, response) -> {
+//                            response.setHeader("Server", "");
+//                        })
+//                )
                 .cors(withDefaults())
                 .csrf(withDefaults())
                 .authorizeHttpRequests((requests) -> requests
