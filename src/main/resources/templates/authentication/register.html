@@ -4,8 +4,9 @@
 <head>
     <title>Register</title>
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"-->
+<!--          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">-->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/css/password-input-visual-effects.css}" type="text/css"/>
 </head>
 <body class="bg-light">
@@ -16,37 +17,35 @@
         <p th:if="${MSG_ERROR}" class="alert alert-danger mb-4" role="alert" th:text="${MSG_ERROR}"></p>
 
         <form th:action="@{/register}" th:object="${userRegistrationDTO}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="mb-3">
                 <label for="username" class="form-label">Username:</label>
                 <input type="text" id="username" class="form-control" th:field="*{username}" required/>
-                <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"
-                     th:text="${#fields.errors('username').getFirst()}"></div>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email:</label>
                 <input type="email" id="email" class="form-control" th:field="*{email}" required/>
-                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
-                     th:text="${#fields.errors('email').getFirst()}"></div>
             </div>
             <div class="mb-3">
                 <div class="password-container">
                     <label for="password" class="form-label">Password:</label>
 
-                    <input type="password" id="password" class="form-control" th:field="*{password}"
-                           onchange="checkEntropy()" required/>
+                    <input type="password" id="password" class="form-control" th:field="*{password}" required/>
+<!--                           onchange="checkEntropy()" -->
                     <div id="password-strength-bar" class="password-strength-bar"></div>
                 </div>
                 <div id="result"></div>
-
-                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
-                     th:text="${#fields.errors('password').getFirst()}"></div>
             </div>
             <div class="mb-3">
                 <label for="passwordToConfirm" class="form-label">Confirm password:</label>
                 <input type="password" id="passwordToConfirm" class="form-control" th:field="*{passwordToConfirm}"
                        required/>
-                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{passwordToConfirm}"
-                     th:text="${#fields.errors('passwordToConfirm').getFirst()}"></div>
+            </div>
+
+            <!--Do you like honey?-->
+            <div class="mb-3 d-none">
+                <label for="ver-code" class="form-label">Honey</label>
+                <input type="text" id="ver-code" name="ver-code" th:field="*{veryNecessaryCode}">
             </div>
 
             <p class="mt-3 text-center">Already have an account? <a href="/login">Login</a></p>
@@ -60,8 +59,9 @@
 
     <script th:src="@{/js/password-input-visual-effects.js}" type="text/javascript"></script>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"-->
+<!--        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"-->
+<!--        crossorigin="anonymous"></script>-->
+<script th:src="@{/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
 </body>
 </html>

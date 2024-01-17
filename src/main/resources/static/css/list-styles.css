@@ -1,0 +1,23 @@
+.note-card {
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
+.note-inner-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    margin-left: 0.75rem;
+    margin-right: -0.1rem;
+    padding: 1rem 1rem 0.5rem;
+}
+.note-inner-card:hover {
+    background: #f8f9fa;
+}
+
+.action-buttons-custom {
+    gap: 0.15rem;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+}

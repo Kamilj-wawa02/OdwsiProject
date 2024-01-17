@@ -25,11 +25,11 @@ spring:
           auth: true
           starttls:
             enable: true
-logging:
-  level:
+#logging:
+#  level:
 #    org.springframework.security: DEBUG
 #    org.hibernate: DEBUG
-    org.springframework.mail.javamail: DEBUG
+#    org.springframework.mail.javamail: DEBUG
 server:
   port: 443
   ssl:

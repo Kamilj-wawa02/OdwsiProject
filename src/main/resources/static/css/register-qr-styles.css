@@ -1,0 +1,10 @@
+.qr-box {
+    max-width: 13rem;
+    max-height: 13rem;
+    padding: 0.5rem
+}
+
+.qr-img {
+    width: 100%;
+    height: 100%
+}

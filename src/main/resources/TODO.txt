@@ -1,8 +1,0 @@
-- włączyć TOTP
-
-DODATKOWE
-- zabezpieczenie przeciwko Cross-Site Request Forgery (żetony CSRF/XSRF)
-- monitorowanie pracy systemu (np. żeby poinformować użytkownika o nowych komputerach, które łączyły się z jego kontem)
-- pozostawienie tzw. honeypots
-- mechanizm Content-Security-Policy,
-- wyłączenie nagłówka Server

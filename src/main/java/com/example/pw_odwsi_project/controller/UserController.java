@@ -13,7 +13,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,8 +24,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 
-
 @Controller
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class UserController {
 
@@ -32,7 +34,7 @@ public class UserController {
 
     @GetMapping("/register")
     public String register(Model model) {
-        model.addAttribute("userRegistrationDTO", new UserRegistrationDTO("", "", "", ""));
+        model.addAttribute("userRegistrationDTO", new UserRegistrationDTO("", "", "", "", ""));
         return "authentication/register";
     }
 
@@ -41,6 +43,11 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             bindingErrorHandler.handleBindingError(bindingResult, model);
             return "authentication/register";
+        }
+
+        if (userRegistrationDTO.veryNecessaryCode() != null) {
+            log.warn("Honeypot detected a bot trying to fill in fake field with '" + userRegistrationDTO.veryNecessaryCode() +
+                    "'! More information: username=" + userRegistrationDTO.username() + ", email=" + userRegistrationDTO.email());
         }
 
         try {

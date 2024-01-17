@@ -51,3 +51,4 @@ function checkEntropy() {
 
 const passwordInput = document.getElementById("password");
 passwordInput.addEventListener("input", checkEntropy);
+passwordInput.addEventListener("change", checkEntropy);

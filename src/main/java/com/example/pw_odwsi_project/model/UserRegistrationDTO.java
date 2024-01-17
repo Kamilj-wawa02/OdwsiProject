@@ -19,7 +19,10 @@ public record UserRegistrationDTO(
 
         @NotNull
         @Size(max = 255)
-        String passwordToConfirm
+        String passwordToConfirm,
+
+        @Size(max = 255)
+        String veryNecessaryCode
 
 ) {
 }

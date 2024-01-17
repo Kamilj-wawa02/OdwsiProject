@@ -39,7 +39,7 @@ public class EncryptionService {
 
             return Base64.getEncoder().encodeToString(encryptedBytesAddedSaltAndIV);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new IllegalStateException("Encryption failed.", e);
+            throw new IllegalStateException("Encryption failed - please check the provided password.", e);
         }
     }
 
@@ -55,7 +55,7 @@ public class EncryptionService {
             final var decryptedBytes = cipher.doFinal(encryptedBytesRemovedSaltAndIV);
             return new String(decryptedBytes);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new IllegalStateException("Decryption failed.", e);
+            throw new IllegalStateException("Decryption failed - please check the provided password.", e);
         }
     }
 
@@ -81,7 +81,7 @@ public class EncryptionService {
             cipher.init(mode, secretKeySpec, new IvParameterSpec(iv));
             return cipher;
         } catch (Exception e) {
-            throw new IllegalStateException("Cipher initialization failed.", e);
+            throw new IllegalStateException("Cipher initialization failed - please check the provided password.", e);
         }
     }
 

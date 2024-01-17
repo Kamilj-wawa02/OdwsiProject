@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
 import java.util.List;
 
@@ -40,11 +41,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain configure(final HttpSecurity http, List<AuthenticationProvider> providers) throws Exception {
         return http
-//                .headers(headers -> headers
+                .headers(headers -> headers
 //                        .addHeaderWriter((request, response) -> {
 //                            response.setHeader("Server", "");
 //                        })
-//                )
+                        .contentSecurityPolicy(contentSecurityPolicyConfig -> contentSecurityPolicyConfig
+                                .policyDirectives("default-src 'self'; img-src * data:; object-src 'none'; upgrade-insecure-requests;"))
+                        .xssProtection(xssProtectionConfig -> xssProtectionConfig.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                )
                 .cors(withDefaults())
                 .csrf(withDefaults())
                 .authorizeHttpRequests((requests) -> requests
